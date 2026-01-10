@@ -1,23 +1,6 @@
-// const postModel = require("../models/post.model.js");
-// const generateCaption = require("../service/ai.service.js");
-// constgenerateCaption = require("../service/ai.service.js");
-
-// const createPostController = async (req, res) => {
-//   const file = req.file;
-//   console.log("File recieved:", file);
-
-//   const base64ImageFile = new Buffer.from(file.buffer).toString("base64");
-
-//   const caption = await generateCaption(base64ImageFile);
-//   console.log("Generated caption:", caption);
-//   res.json({
-//     caption
-//   })
-// };
-
-// module.exports = { createPostController };
-
-const { generateCaption } = require("../service/ai.service");
+const postModel = require("../models/post.model.js");
+const uploadFile = require("../service/storage.service");
+const { v4: uuidv4 } = require("uuid");
 
 const createPostController = async (req, res) => {
   try {
@@ -25,15 +8,26 @@ const createPostController = async (req, res) => {
       return res.status(400).json({ message: "Image required" });
     }
 
-    const base64Image = req.file.buffer.toString("base64");
-    const caption = await generateCaption(base64Image, req.file.mimetype);
+    // 🔹 Use static caption for now
+    const caption = "New post ✨";
 
-    res.json({
-      success: true,
+    // Upload to ImageKit
+    const result = await uploadFile(req.file.buffer, `${uuidv4()}.jpg`);
+
+    // Save post
+    const post = await postModel.create({
       caption,
+      image: result.url,
+      user: req.user ? req.user._id : null, // safe fallback
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Post Created Successfully",
+      post,
     });
   } catch (error) {
-    console.error(error);
+    console.error("POST ERROR:", error);
     res.status(500).json({ error: error.message });
   }
 };

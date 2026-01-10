@@ -1,54 +1,55 @@
+// require("dotenv").config();
+// const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// async function generateCaption(base64Image, mimeType) {
+//   try {
+//     const model = genAI.getGenerativeModel({
+//       model: "gemini-pro-vision",
+//     });
+
+//     const result = await model.generateContent([
+//       {
+//         inlineData: {
+//           data: base64Image,
+//           mimeType,
+//         },
+//       },
+//       "Generate one short, meaningful, slightly funny social media caption for this image.",
+//     ]);
+
+//     return result.response.text();
+//   } catch (err) {
+//     console.error("Gemini Error:", err.message);
+
+//     // fallback so post creation never breaks
+//     return "A moment worth sharing ✨";
+//   }
+// }
+
+// module.exports = { generateCaption };
+
+
 require("dotenv").config();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-/**
- * Utility: get a valid model
- */
-async function getValidModel() {
+async function generateCaption() {
   try {
-    const models = await genAI.listModels(); // list all available models
-    // Try to find gemini-2.5-flash
-    const model = models.find((m) => m.name === "gemini-2.5-flash");
-    if (!model) {
-      throw new Error("No valid Gemini model found in your API key");
-    }
-    return model.name;
-  } catch (err) {
-    console.error("Error listing models:", err.message);
-    // fallback hard-coded
-    return "gemini-2.5-flash";
-  }
-}
+    const model = genAI.getGenerativeModel({
+      model: "gemini-pro",
+    });
 
-/**
- * Generate image caption from base64
- */
-async function generateCaption(base64Image, mimeType) {
-  try {
-    const modelName = await getValidModel();
-
-    const model = genAI.getGenerativeModel({ model: modelName });
-
-    const result = await model.generateContent([
-      {
-        inlineData: {
-          mimeType,
-          data: base64Image,
-        },
-      },
-      {
-        text: `Caption this image.
-Generate only one caption.
-Make it meaningful and sometimes funny.`,
-      },
-    ]);
+    const result = await model.generateContent(
+      "Generate one short, meaningful, slightly funny social media caption."
+    );
 
     return result.response.text();
   } catch (err) {
-    console.error("[GoogleGenerativeAI Error]:", err.message);
-    throw new Error(`[GoogleGenerativeAI Error]: ${err.message}`);
+    console.error("Gemini Error:", err.message);
+    return "A moment worth sharing ✨";
   }
 }
 

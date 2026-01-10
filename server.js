@@ -22,6 +22,7 @@
 // app.listen(port, () => {
 //   console.log(`Example app listening on port ${port}`);
 // });
+require("dotenv").config(); // ✅ FIRST LINE — NO EXCEPTIONS
 
 const express = require("express");
 const cookieParser = require("cookie-parser");
@@ -31,7 +32,6 @@ const postRoutes = require("./src/routes/post.route");
 
 const app = express();
 const port = 3000;
-require("dotenv").config();
 
 app.use(express.json());
 app.use(cookieParser());
@@ -39,8 +39,8 @@ app.use(cookieParser());
 connectDB();
 
 // ROUTES
-app.use("/api", router); // user routes
-app.use("/api/posts", postRoutes); // post routes
+app.use("/api", router);
+app.use("/api/posts", postRoutes);
 
 app.post("/test", (req, res) => {
   res.send("tested success");
